@@ -84,19 +84,57 @@ st.markdown(
 ################################################################################
 # 4) SIDEBAR: MODEL SELECTION & PARAMETERS
 ################################################################################
-st.sidebar.write("## Assets")
+# --- Assets Section ---
+st.sidebar.header("Assets")
 selected_sp500 = st.sidebar.multiselect(
     "Pick assets (S&P 500 partial list, type to filter)",
     SP500_TICKERS,
-    default=["AAPL", "MSFT"]
+    default=["AAPL", "MSFT"],
+    key="selected_sp500",
 )
 
-custom_input = st.sidebar.text_input(
-    "Advanced ticker(s) research (comma-delimited)",
-    value=""
-)
-custom_list = [x.strip().upper() for x in custom_input.split(",") if x.strip()]
-assets = selected_sp500 + custom_list
+with st.sidebar.expander("Advanced assets search", icon=":material/search:"):
+    custom_input = st.text_input(
+        "Advanced ticker(s) research (comma-delimited)",
+        value="",
+        key="custom_input",
+    )
+    # Split input and transform into ticker list
+    custom_list = [x.strip().upper() for x in custom_input.split(",") if x.strip()]
+    
+    # Open the local CSV file in binary mode
+    with open("assets_template.csv", "rb") as file:
+        csv_data = file.read()
+
+    # Create a download button that serves the file content
+    st.download_button(
+        label="Download CSV File template",
+        data=csv_data,
+        file_name="assets_template.csv",
+        mime="text/csv",
+        icon=":material/download:"
+    )
+    uploaded_file = st.file_uploader("Upload your CSV file", key="uploaded_file", type="csv", accept_multiple_files=False)
+    
+    csv_tickers = []
+    if uploaded_file is not None:
+        try:
+            uploaded_file_data = pd.read_csv(uploaded_file)
+        except Exception as e:
+            st.error(f"Error reading CSV file: {e}")
+        else:
+            # Check if the CSV contains the "Ticker" column and at least one row
+            if "Ticker" not in uploaded_file_data.columns:
+                st.error("CSV file does not contain the required column: 'Ticker'.")
+            elif uploaded_file_data.empty:
+                st.error("CSV file is empty. Please provide at least one row of data.")
+            else:
+                st.caption(f"Imported tickers from **{uploaded_file.name}** file")
+                st.dataframe(uploaded_file_data, hide_index=True)
+                csv_tickers = uploaded_file_data["Ticker"].dropna().astype(str).str.upper().tolist()
+
+# Combine assets from selections and make sure to return a unique list
+assets = list(set(selected_sp500 + custom_list + csv_tickers))
 
 st.sidebar.write("## Time range")
 
