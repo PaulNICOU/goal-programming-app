@@ -2,6 +2,9 @@
 
 ### Authors: [Paul NICOU](https://www.linkedin.com/in/paul-nicou/) & [Tristan Nercellas](https://www.linkedin.com/in/tristannercellas/)
 
+## Project already hosted 
+If you don't want to run the project locally, you can access the app by clicking [here](https://goal-programming-app.streamlit.app/App_Quantitative_Finance).
+
 ## Running the project
 
 ### 1. Requirements
@@ -31,4 +34,4 @@ Or alternatively:
 ```bash
 streamlit run Documentation.py
 ```
-# goal-programming-app
+
